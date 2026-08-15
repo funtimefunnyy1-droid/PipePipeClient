@@ -14,16 +14,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Clone Extractor Dependency
         run: |
           cd ..
           git clone https://github.com/InfinityLoop1308/PipePipeExtractor.git
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
@@ -31,7 +32,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build APK
-        run: ./gradlew assembleDebug --no-configuration-cache --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --info
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
