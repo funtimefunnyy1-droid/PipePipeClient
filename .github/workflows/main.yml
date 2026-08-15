@@ -15,11 +15,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Checkout Extractor Dependency
-        uses: actions/checkout@v4
-        with:
-          repository: 'InfinityLoop1308/PipePipeExtractor'
-          path: '../PipePipeExtractor'
+      - name: Clone Extractor Dependency
+        run: |
+          cd ..
+          git clone https://github.com/InfinityLoop1308/PipePipeExtractor.git
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
