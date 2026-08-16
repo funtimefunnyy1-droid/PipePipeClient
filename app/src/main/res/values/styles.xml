@@ -13,10 +13,10 @@
 
     <!-- Base Theme -->
     <style name="Base.V19" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="actionColor">@color/white</item>
+        <item name="actionColor">@color/libretube_blue</item>
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonTheme</item>
-        <item name="toolbarSearchColor">@color/white</item>
-        <item name="colorControlActivated">?attr/colorPrimary</item>
+        <item name="toolbarSearchColor">@color/libretube_text_primary</item>
+        <item name="colorControlActivated">@color/libretube_blue</item>
     </style>
     <style name="Base" parent="Base.V19"/>
 
@@ -46,47 +46,50 @@
     <style name="Base.LightTheme" parent="Base.V19.LightTheme" />
     <style name="LightTheme" parent="Base.LightTheme"/>
 
-    <!-- Dark Theme -->
+    <!-- Dark Theme (LibreTube Aesthetic) -->
     <style name="Base.V19.DarkTheme" parent="Base">
-        <item name="colorPrimary">@color/dark_youtube_primary_color</item>
-        <item name="colorPrimaryDark">@color/dark_youtube_primary_color</item>
-        <item name="colorAccent">@color/dark_youtube_accent_color</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/white_secondary</item>
-        <item name="android:textColorTertiary">@color/white_secondary</item>
-        <item name="android:windowBackground">@color/dark_background_color</item>
-        <item name="windowBackground">@color/dark_background_color</item>
+        <item name="colorPrimary">@color/dark_background</item>
+        <item name="colorPrimaryDark">@color/dark_background</item>
+        <item name="colorAccent">@color/libretube_blue</item>
+        <item name="android:textColorPrimary">@color/libretube_text_primary</item>
+        <item name="android:textColorSecondary">@color/libretube_text_secondary</item>
+        <item name="android:textColorTertiary">@color/libretube_text_secondary</item>
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="windowBackground">@color/dark_background</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme.Dark.Base</item>
 
-        <item name="separator_color">@color/dark_separator_color</item>
-        <item name="contrast_background_color">@color/dark_contrast_background_color</item>
+        <item name="separator_color">@color/dark_surface_container</item>
+        <item name="contrast_background_color">@color/dark_surface</item>
         <item name="checked_selector">@drawable/selector_checked_dark</item>
         <item name="focused_selector">@drawable/selector_focused_dark</item>
         <item name="toolbar_shadow">@drawable/toolbar_shadow_dark</item>
         <item name="selector">@drawable/selector_dark</item>
-        <item name="colorControlHighlight">@color/dark_ripple_color</item>
+        <item name="colorControlHighlight">#33A8C7FA</item>
         <item name="progress_horizontal_drawable">@drawable/progress_youtube_horizontal_dark_rounded</item>
-        <item name="card_item_background_color">@color/dark_card_item_background_color</item>
-        <item name="card_item_contrast_color">@color/dark_card_item_contrast_color</item>
-        <item name="border_color">@color/dark_border_color</item>
+        <item name="card_item_background_color">@color/dark_surface</item>
+        <item name="card_item_contrast_color">@color/dark_surface_container</item>
+        <item name="border_color">@color/dark_surface_container</item>
         <item name="dashed_border">@drawable/dashed_border_dark</item>
-        <item name="tag_text_color">@color/white</item>
+        <item name="tag_text_color">@color/libretube_text_primary</item>
     </style>
     <style name="Base.DarkTheme" parent="Base.V19.DarkTheme" />
     <style name="DarkTheme" parent="Base.DarkTheme"/>
 
-    <!-- Black Theme -->
+    <!-- Black Theme (AMOLED LibreTube) -->
     <style name="Base.V19.BlackTheme" parent="DarkTheme">
-        <item name="android:windowBackground">@color/black_background_color</item>
-        <item name="windowBackground">@color/black_background_color</item>
+        <item name="colorPrimary">#000000</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorAccent">@color/libretube_blue</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="windowBackground">#000000</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme.Black</item>
 
-        <item name="separator_color">@color/black_separator_color</item>
-        <item name="contrast_background_color">@color/black_contrast_background_color</item>
+        <item name="separator_color">#1F1F1F</item>
+        <item name="contrast_background_color">#121212</item>
 
-        <item name="card_item_background_color">@color/black_card_item_background_color</item>
-        <item name="card_item_contrast_color">@color/black_card_item_contrast_color</item>
-        <item name="border_color">@color/black_border_color</item>
+        <item name="card_item_background_color">#121212</item>
+        <item name="card_item_contrast_color">#1F1F1F</item>
+        <item name="border_color">#1F1F1F</item>
         <item name="dashed_border">@drawable/dashed_border_black</item>
     </style>
     <style name="Base.BlackTheme" parent="Base.V19.BlackTheme" />
@@ -102,11 +105,11 @@
     </style>
 
     <style name="DarkDialogTheme" parent="Theme.AppCompat.DayNight.Dialog">
-        <item name="colorPrimary">@color/dark_youtube_primary_color</item>
-        <item name="colorPrimaryDark">@color/dark_youtube_primary_color</item>
-        <item name="colorAccent">@color/dark_youtube_accent_color</item>
-        <item name="android:windowBackground">@color/dark_dialog_background_color</item>
-        <item name="windowBackground">@color/dark_dialog_background_color</item>
+        <item name="colorPrimary">@color/dark_background</item>
+        <item name="colorPrimaryDark">@color/dark_background</item>
+        <item name="colorAccent">@color/libretube_blue</item>
+        <item name="android:windowBackground">@color/dark_surface</item>
+        <item name="windowBackground">@color/dark_surface</item>
     </style>
 
     <style name="LightDialogMinWidthTheme" parent="Theme.AppCompat.DayNight.Dialog.MinWidth">
@@ -118,11 +121,11 @@
     </style>
 
     <style name="DarkDialogMinWidthTheme" parent="Theme.AppCompat.DayNight.Dialog.MinWidth">
-        <item name="colorPrimary">@color/dark_youtube_primary_color</item>
-        <item name="colorPrimaryDark">@color/dark_youtube_primary_color</item>
-        <item name="colorAccent">@color/dark_youtube_accent_color</item>
-        <item name="android:windowBackground">@color/dark_dialog_background_color</item>
-        <item name="windowBackground">@color/dark_dialog_background_color</item>
+        <item name="colorPrimary">@color/dark_background</item>
+        <item name="colorPrimaryDark">@color/dark_background</item>
+        <item name="colorAccent">@color/libretube_blue</item>
+        <item name="android:windowBackground">@color/dark_surface</item>
+        <item name="windowBackground">@color/dark_surface</item>
     </style>
 
     <!-- Settings -->
@@ -131,11 +134,11 @@
     </style>
 
     <style name="DarkSettingsTheme" parent="DarkTheme">
-        <item name="colorAccent">@color/dark_settings_accent_color</item>
+        <item name="colorAccent">@color/libretube_blue</item>
     </style>
 
     <style name="BlackSettingsTheme" parent="BlackTheme">
-        <item name="colorAccent">@color/black_settings_accent_color</item>
+        <item name="colorAccent">@color/libretube_blue</item>
     </style>
 
     <style name="RouterActivityThemeLight" parent="LightTheme">
@@ -154,7 +157,6 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-
     <style name="BottomSheetDialogTheme.Light.V19" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -165,16 +167,16 @@
     <style name="BottomSheetDialogTheme.Dark.V19" parent="Theme.Design.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/dark_bottom_sheet_color</item>
+        <item name="android:navigationBarColor">@color/dark_surface</item>
     </style>
     <style name="BottomSheetDialogTheme.Dark.Base" parent="BottomSheetDialogTheme.Dark.V19"/>
 
     <style name="BottomSheetDialogTheme.Black" parent="BottomSheetDialogTheme.Dark.Base">
-        <item name="android:navigationBarColor">#121212</item>
+        <item name="android:navigationBarColor">#000000</item>
         <item name="bottomSheetStyle">@style/BottomSheetStyle.Black</item>
     </style>
     <style name="BottomSheetStyle.Black" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@color/black_bottom_sheet_color</item>
+        <item name="android:background">#121212</item>
     </style>
 
 </resources>
