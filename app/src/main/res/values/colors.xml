@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base Standard Colors -->
+    <!-- Standard Base Colors -->
     <color name="white">#FFFFFF</color>
     <color name="white_secondary">#B3FFFFFF</color>
     <color name="black">#000000</color>
@@ -13,7 +13,16 @@
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
 
-    <!-- System & UI Fallbacks -->
+    <!-- UI Components & Subscription Buttons -->
+    <color name="subscribe_text_color">#00315B</color>
+    <color name="subscribe_button_color">#A8C7FA</color>
+    <color name="subscribed_text_color">#E2E2E6</color>
+    <color name="subscribed_button_color">#23252B</color>
+    <color name="duration_background_color">#CC121316</color>
+    <color name="duration_text_color">#FFFFFF</color>
+    <color name="red">#E0245E</color>
+
+    <!-- Light Theme Legacy Palette -->
     <color name="light_background_color">#F8F9FA</color>
     <color name="light_dialog_background_color">#FFFFFF</color>
     <color name="light_settings_accent_color">#1A73E8</color>
@@ -24,6 +33,7 @@
     <color name="light_card_item_contrast_color">#F1F3F4</color>
     <color name="light_border_color">#E0E0E0</color>
 
+    <!-- Dark Theme Legacy Palette -->
     <color name="dark_background_color">#121316</color>
     <color name="dark_dialog_background_color">#1B1B1F</color>
     <color name="dark_settings_accent_color">#A8C7FA</color>
@@ -35,6 +45,7 @@
     <color name="dark_border_color">#23252B</color>
     <color name="dark_bottom_sheet_color">#1B1B1F</color>
 
+    <!-- AMOLED Black Theme Legacy Palette -->
     <color name="black_background_color">#000000</color>
     <color name="black_card_item_background_color">#121212</color>
     <color name="black_card_item_contrast_color">#1F1F1F</color>
@@ -44,10 +55,7 @@
     <color name="black_settings_accent_color">#A8C7FA</color>
     <color name="black_bottom_sheet_color">#121212</color>
 
-    <color name="duration_background_color">#CC121316</color>
-    <color name="duration_text_color">#FFFFFF</color>
-
-    <!-- LibreTube Material 3 Dark Tokens -->
+    <!-- LibreTube Material 3 Palette -->
     <color name="dark_background">#121316</color>
     <color name="dark_surface">#1B1B1F</color>
     <color name="dark_surface_container">#23252B</color>
@@ -57,4 +65,3 @@
     <color name="libretube_text_secondary">#8E9199</color>
 
 </resources>
-
