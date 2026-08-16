@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+  <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <!-- Base Standard Colors -->
@@ -11,12 +11,22 @@
     <color name="green">#17BF63</color>
     <color name="bluegray">#607D8B</color>
 
-    <!-- Overrides & Icons -->
+    <!-- Base Overrides & Icons -->
     <color name="contrastColor">@color/black</color>
     <color name="defaultIconTint">?android:attr/textColorPrimary</color>
     <color name="ic_launcher_background">#121316</color>
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
+
+    <!-- Kotlin Feed & Stream Badges -->
+    <color name="paid_video_background_color">#8E24AA</color>
+    <color name="live_duration_background_color">#D32F2F</color>
+
+    <!-- Kotlin About & License Colors -->
+    <color name="light_license_background_color">#F8F9FA</color>
+    <color name="dark_license_background_color">#1B1B1F</color>
+    <color name="light_license_text_color">#202124</color>
+    <color name="dark_license_text_color">#E2E2E6</color>
 
     <!-- SponsorBlock Segment Colors -->
     <color name="sponsor_segment">#00D400</color>
@@ -106,3 +116,4 @@
     <color name="libretube_text_secondary">#8E9199</color>
 
 </resources>
+  
