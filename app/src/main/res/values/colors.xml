@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Standard Base Colors -->
+    <!-- Base Standard Colors -->
     <color name="white">#FFFFFF</color>
     <color name="white_secondary">#B3FFFFFF</color>
     <color name="black">#000000</color>
@@ -13,9 +13,7 @@
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
 
-    <!-- Light Theme Colors -->
-    <color name="light_youtube_primary_color">#FFFFFF</color>
-    <color name="light_youtube_accent_color">#A8C7FA</color>
+    <!-- System & UI Fallbacks -->
     <color name="light_background_color">#F8F9FA</color>
     <color name="light_dialog_background_color">#FFFFFF</color>
     <color name="light_settings_accent_color">#1A73E8</color>
@@ -26,9 +24,6 @@
     <color name="light_card_item_contrast_color">#F1F3F4</color>
     <color name="light_border_color">#E0E0E0</color>
 
-    <!-- Dark Theme Legacy Keys -->
-    <color name="dark_youtube_primary_color">#121316</color>
-    <color name="dark_youtube_accent_color">#A8C7FA</color>
     <color name="dark_background_color">#121316</color>
     <color name="dark_dialog_background_color">#1B1B1F</color>
     <color name="dark_settings_accent_color">#A8C7FA</color>
@@ -40,7 +35,6 @@
     <color name="dark_border_color">#23252B</color>
     <color name="dark_bottom_sheet_color">#1B1B1F</color>
 
-    <!-- Black Theme Legacy Keys -->
     <color name="black_background_color">#000000</color>
     <color name="black_card_item_background_color">#121212</color>
     <color name="black_card_item_contrast_color">#1F1F1F</color>
@@ -50,11 +44,10 @@
     <color name="black_settings_accent_color">#A8C7FA</color>
     <color name="black_bottom_sheet_color">#121212</color>
 
-    <!-- Media Controls & Overlays -->
     <color name="duration_background_color">#CC121316</color>
     <color name="duration_text_color">#FFFFFF</color>
 
-    <!-- LibreTube Material 3 Dark Palette -->
+    <!-- LibreTube Material 3 Dark Tokens -->
     <color name="dark_background">#121316</color>
     <color name="dark_surface">#1B1B1F</color>
     <color name="dark_surface_container">#23252B</color>
@@ -64,3 +57,4 @@
     <color name="libretube_text_secondary">#8E9199</color>
 
 </resources>
+
