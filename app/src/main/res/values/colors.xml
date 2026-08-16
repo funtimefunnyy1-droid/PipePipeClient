@@ -4,6 +4,7 @@
     <color name="white">#FFFFFF</color>
     <color name="white_secondary">#B3FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="gray">#888888</color>
     <color name="transparent_background_color">#00000000</color>
     <color name="transparent">#00000000</color>
     <color name="red">#E0245E</color>
@@ -16,6 +17,14 @@
     <color name="ic_launcher_background">#121316</color>
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
+
+    <!-- GigaGet Download Manager Progress Colors -->
+    <color name="audio_left_to_load_color">#FF9800</color>
+    <color name="video_left_to_load_color">#2196F3</color>
+    <color name="subtitle_left_to_load_color">#4CAF50</color>
+    <color name="audio_already_load_color">#FFA726</color>
+    <color name="video_already_load_color">#42A5F5</color>
+    <color name="subtitle_already_load_color">#66BB6A</color>
 
     <!-- Kotlin Feed & Stream Badges -->
     <color name="paid_video_background_color">#8E24AA</color>
@@ -71,6 +80,7 @@
     <color name="subscribe_button_color">#A8C7FA</color>
     <color name="subscribed_text_color">#E2E2E6</color>
     <color name="subscribed_button_color">#23252B</color>
+    <color name="subscribed_background_color">#23252B</color>
 
     <!-- Light Theme Legacy Palette -->
     <color name="light_background_color">#F8F9FA</color>
