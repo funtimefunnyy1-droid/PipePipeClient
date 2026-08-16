@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Standard Base Colors -->
+    <!-- Base Standard Colors -->
     <color name="white">#FFFFFF</color>
     <color name="white_secondary">#B3FFFFFF</color>
     <color name="black">#000000</color>
@@ -9,13 +9,26 @@
     <color name="transparent">#00000000</color>
     <color name="red">#E0245E</color>
     <color name="green">#17BF63</color>
+    <color name="bluegray">#607D8B</color>
 
-    <!-- Base UI Overrides -->
+    <!-- Overrides & Icons -->
     <color name="contrastColor">@color/black</color>
     <color name="defaultIconTint">?android:attr/textColorPrimary</color>
     <color name="ic_launcher_background">#121316</color>
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
+
+    <!-- SponsorBlock Segment Colors -->
+    <color name="sponsor_segment">#00D400</color>
+    <color name="intro_segment">#00FFFF</color>
+    <color name="outro_segment">#0202ED</color>
+    <color name="interaction_segment">#CC00FF</color>
+    <color name="highlight_segment">#FFFF00</color>
+    <color name="self_promo_segment">#FFFF00</color>
+    <color name="non_music_segment">#FF9900</color>
+    <color name="preview_segment">#008FD6</color>
+    <color name="filler_segment">#7300FF</color>
+    <color name="pending_segment">#FFFFFF</color>
 
     <!-- Navigation Drawer & Headers -->
     <color name="drawer_header_font_color">#E2E2E6</color>
@@ -29,12 +42,13 @@
     <color name="channel_subscriber_counter_color">#8E9199</color>
     <color name="detail_item_drag_hint_color">#4DFFFFFF</color>
 
-    <!-- Video Player Overlays, Fast-Forward & Controls -->
+    <!-- Video Player Overlays & Queues -->
     <color name="video_overlay_color">#99000000</color>
     <color name="duration_background_color">#CC121316</color>
     <color name="duration_text_color">#FFFFFF</color>
     <color name="fast_forward_rewind_background_color">#4D000000</color>
     <color name="panel_background_color">#1B1B1F</color>
+    <color name="queue_background_color">#121316</color>
 
     <!-- Selectors, Highlights & Shadows -->
     <color name="selected_background_color">#23252B</color>
