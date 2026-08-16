@@ -1,6 +1,5 @@
-  <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- Base Standard Colors -->
     <color name="white">#FFFFFF</color>
     <color name="white_secondary">#B3FFFFFF</color>
@@ -114,6 +113,4 @@
     <color name="libretube_on_blue">#00315B</color>
     <color name="libretube_text_primary">#E2E2E6</color>
     <color name="libretube_text_secondary">#8E9199</color>
-
 </resources>
-  
