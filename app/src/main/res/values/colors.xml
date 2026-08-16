@@ -6,25 +6,35 @@
     <color name="white_secondary">#B3FFFFFF</color>
     <color name="black">#000000</color>
     <color name="transparent_background_color">#00000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="red">#E0245E</color>
+    <color name="green">#17BF63</color>
 
+    <!-- Base UI Overrides -->
     <color name="contrastColor">@color/black</color>
     <color name="defaultIconTint">?android:attr/textColorPrimary</color>
     <color name="ic_launcher_background">#121316</color>
     <color name="placeholder_background">#1E1F24</color>
     <color name="placeholder_foreground">#23252B</color>
 
-    <!-- Navigation Drawer & Header -->
+    <!-- Navigation Drawer & Headers -->
     <color name="drawer_header_font_color">#E2E2E6</color>
     <color name="drawer_background_color">#121316</color>
+    <color name="drawer_item_font_color">#E2E2E6</color>
+    <color name="drawer_item_icon_tint">#8E9199</color>
 
-    <!-- Comments & Playlists -->
+    <!-- Comments, Feeds & Playlists -->
     <color name="show_replies_button_text_color">#A8C7FA</color>
     <color name="playlist_stream_count_background_color">#CC121316</color>
+    <color name="channel_subscriber_counter_color">#8E9199</color>
+    <color name="detail_item_drag_hint_color">#4DFFFFFF</color>
 
-    <!-- Video Player Overlays & Controls -->
+    <!-- Video Player Overlays, Fast-Forward & Controls -->
     <color name="video_overlay_color">#99000000</color>
     <color name="duration_background_color">#CC121316</color>
     <color name="duration_text_color">#FFFFFF</color>
+    <color name="fast_forward_rewind_background_color">#4D000000</color>
+    <color name="panel_background_color">#1B1B1F</color>
 
     <!-- Selectors, Highlights & Shadows -->
     <color name="selected_background_color">#23252B</color>
@@ -38,7 +48,6 @@
     <color name="subscribe_button_color">#A8C7FA</color>
     <color name="subscribed_text_color">#E2E2E6</color>
     <color name="subscribed_button_color">#23252B</color>
-    <color name="red">#E0245E</color>
 
     <!-- Light Theme Legacy Palette -->
     <color name="light_background_color">#F8F9FA</color>
@@ -73,7 +82,7 @@
     <color name="black_settings_accent_color">#A8C7FA</color>
     <color name="black_bottom_sheet_color">#121212</color>
 
-    <!-- LibreTube Material 3 Dark Palette -->
+    <!-- LibreTube Material 3 Palette -->
     <color name="dark_background">#121316</color>
     <color name="dark_surface">#1B1B1F</color>
     <color name="dark_surface_container">#23252B</color>
