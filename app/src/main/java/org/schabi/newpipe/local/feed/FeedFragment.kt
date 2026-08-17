@@ -253,11 +253,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 } else {
                     feedBinding.continueWatchingContainer.isVisible = true
                     val carouselItems = entries.take(10).map { entry ->
-                        val streamWithState = StreamWithState().apply {
-                            stream = entry.streamEntity
-                        }
                         StreamItem(
-                            streamWithState
+                            StreamWithState(entry.streamEntity, null)
                         ).apply {
                             itemVersion = StreamItem.ItemVersion.CARD
                         }
