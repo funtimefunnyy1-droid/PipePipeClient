@@ -2,25 +2,30 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
-    <org.schabi.newpipe.views.ScrollableTabLayout
-        android:id="@+id/main_tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="?attr/colorPrimary"
-        app:tabRippleColor="@color/white"
-        app:tabIconTint="@color/white"
-        app:tabIndicatorColor="@color/white"
-        app:tabGravity="fill"
-        app:tabMinWidth="60dp" />
+    android:layout_height="match_parent"
+    android:background="@color/dark_background">
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/main_tab_layout" />
+        android:layout_above="@id/main_tab_layout" />
+
+    <org.schabi.newpipe.views.ScrollableTabLayout
+        android:id="@+id/main_tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/dark_surface_container"
+        android:elevation="8dp"
+        app:tabGravity="fill"
+        app:tabIconTint="@color/libretube_blue"
+        app:tabIndicatorColor="@color/libretube_blue"
+        app:tabIndicatorHeight="3dp"
+        app:tabMinWidth="60dp"
+        app:tabMode="fixed"
+        app:tabRippleColor="#33A8C7FA"
+        app:tabSelectedTextColor="@color/libretube_blue"
+        app:tabTextColor="@color/libretube_text_secondary" />
 
 </RelativeLayout>
