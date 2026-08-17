@@ -1083,4 +1083,21 @@
 <string name="sabr_backoff_notification_channel_description">Notifications when YouTube requires a playback request to wait</string>
 <string name="sabr_backoff_notification_title">Waiting for YouTube</string>
 <string name="sabr_backoff_notification_content">YouTube forces us to wait %1$d seconds before continuing playback</string>
+
+    <!-- Video Tabs Preference Arrays -->
+    <string-array name="video_tabs_description_list">
+        <item>@string/comments_tab_description</item>
+        <item>@string/related_items_tab_description</item>
+        <item>@string/sponsor_block</item>
+        <item>@string/description_tab_description</item>
+        <item>@string/blank_page_summary</item>
+    </string-array>
+
+    <string-array name="video_tabs_value_list">
+        <item>comments</item>
+        <item>related</item>
+        <item>sponsorblock</item>
+        <item>description</item>
+        <item>blank</item>
+    </string-array>
 </resources>
