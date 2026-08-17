@@ -5,47 +5,61 @@
     android:id="@+id/itemRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="6dp"
-    android:paddingEnd="6dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
     android:paddingTop="6dp"
-    android:paddingBottom="10dp"
+    android:paddingBottom="12dp"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
 
-    <!-- LibreTube Style Rounded Thumbnail Card -->
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/itemThumbnailView"
+    <!-- LibreTube Rounded Card Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/thumbnailCard"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/placeholder_thumbnail_video"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
-        app:cornerSize="14dp"
-        app:layout_constraintBottom_toTopOf="@+id/itemProgressView"
+        app:cardCornerRadius="14dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/dark_surface_container"
         app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Duration Pill Tag -->
-    <org.schabi.newpipe.views.NewPipeTextView
-        android:id="@+id/itemDurationView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="6dp"
-        android:background="#CC121316"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="2dp"
-        android:textAllCaps="true"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/libretube_text_primary"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/itemThumbnailView"
-        app:layout_constraintRight_toRightOf="@id/itemThumbnailView"
-        tools:text="1:09:10" />
+        <ImageView
+            android:id="@+id/itemThumbnailView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_thumbnail_video" />
+
+        <!-- Duration Pill Tag -->
+        <org.schabi.newpipe.views.NewPipeTextView
+            android:id="@+id/itemDurationView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            android:background="#CC121316"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:textAllCaps="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@color/libretube_text_primary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            tools:text="1:09:10" />
+
+        <!-- Watch Progress Bar -->
+        <org.schabi.newpipe.views.AnimatedProgressBar
+            android:id="@+id/itemProgressView"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom"
+            android:progressTint="@color/libretube_blue" />
+
+    </androidx.cardview.widget.CardView>
 
     <!-- Video Title -->
     <org.schabi.newpipe.views.NewPipeTextView
@@ -54,18 +68,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:textColor="@color/libretube_text_primary"
         android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@id/itemThumbnailView"
-        app:layout_constraintStart_toStartOf="@id/itemThumbnailView"
-        app:layout_constraintTop_toBottomOf="@id/itemThumbnailView"
-        tools:text="Determinants in One Shot: All Concepts Covered" />
+        app:layout_constraintEnd_toEndOf="@id/thumbnailCard"
+        app:layout_constraintStart_toStartOf="@id/thumbnailCard"
+        app:layout_constraintTop_toBottomOf="@id/thumbnailCard"
+        tools:text="Physics Lecture 01" />
 
-    <!-- Uploader Name -->
+    <!-- Channel Name -->
     <org.schabi.newpipe.views.NewPipeTextView
         android:id="@+id/itemUploaderView"
         android:layout_width="0dp"
@@ -80,9 +94,9 @@
         app:layout_constraintEnd_toStartOf="@id/itemAdditionalDetails"
         app:layout_constraintStart_toStartOf="@id/itemVideoTitleView"
         app:layout_constraintTop_toBottomOf="@+id/itemVideoTitleView"
-        tools:text="JEE Wallah" />
+        tools:text="Channel Name" />
 
-    <!-- Video Metadata (Views & Time) -->
+    <!-- Metadata (Views & Time) -->
     <org.schabi.newpipe.views.NewPipeTextView
         android:id="@+id/itemAdditionalDetails"
         android:layout_width="wrap_content"
@@ -98,17 +112,6 @@
         app:layout_constraintTop_toTopOf="@id/itemUploaderView"
         tools:text="1 year ago" />
 
-    <!-- Watch Progress Bar -->
-    <org.schabi.newpipe.views.AnimatedProgressBar
-        android:id="@+id/itemProgressView"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="0dp"
-        android:layout_height="3dp"
-        android:progressTint="@color/libretube_blue"
-        app:layout_constraintBottom_toBottomOf="@id/itemThumbnailView"
-        app:layout_constraintEnd_toEndOf="@+id/itemThumbnailView"
-        app:layout_constraintStart_toStartOf="@+id/itemThumbnailView" />
-
     <ImageView
         android:id="@+id/itemHandle"
         android:layout_width="48dp"
@@ -117,8 +120,8 @@
         android:paddingLeft="@dimen/video_item_search_image_right_margin"
         android:scaleType="center"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/itemThumbnailView"
-        app:layout_constraintTop_toBottomOf="@id/itemThumbnailView"
+        app:layout_constraintEnd_toEndOf="@id/thumbnailCard"
+        app:layout_constraintTop_toBottomOf="@id/thumbnailCard"
         app:srcCompat="@drawable/ic_drag_handle"
         tools:ignore="RtlHardcoded,RtlSymmetry" />
 
