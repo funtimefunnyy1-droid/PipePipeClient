@@ -46,6 +46,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.xwray.groupie.GroupieAdapter
 import com.xwray.groupie.Item
@@ -75,6 +76,7 @@ import org.schabi.newpipe.ktx.animateHideRecyclerViewAllowingScrolling
 import org.schabi.newpipe.ktx.slideUp
 import org.schabi.newpipe.local.feed.item.StreamItem
 import org.schabi.newpipe.local.feed.service.FeedLoadService
+import org.schabi.newpipe.local.history.HistoryRecordManager
 import org.schabi.newpipe.local.subscription.SubscriptionManager
 import org.schabi.newpipe.player.PlayerService
 import org.schabi.newpipe.player.playqueue.PlayQueue
@@ -104,6 +106,9 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     private var oldestSubscriptionUpdate: OffsetDateTime? = null
 
     private lateinit var groupAdapter: GroupieAdapter
+    private lateinit var continueWatchingAdapter: GroupieAdapter
+    private var historyRecordManager: HistoryRecordManager? = null
+
     @JvmField var showPlayedItems: Boolean = true
 
     private var onSettingsChangeListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
@@ -140,7 +145,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         setHasOptionsMenu(true)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -151,6 +155,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
         autoBackgroundPlaying = false
         randomBackgroundPlaying = prefs.getBoolean(getString(R.string.random_music_play_mode_key), false)
+
+        historyRecordManager = HistoryRecordManager(context)
 
         onSettingsChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
@@ -180,7 +186,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     }
 
     override fun onViewCreated(rootView: View, savedInstanceState: Bundle?) {
-        // super.onViewCreated() calls initListeners() which require the binding to be initialized
         _feedBinding = FragmentFeedBinding.bind(rootView)
         playlistControlBinding = PlaylistControlBinding.bind(feedBinding.playlistControl.root)
         super.onViewCreated(rootView, savedInstanceState)
@@ -191,7 +196,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 if (activity?.supportActionBar?.customView != null) {
                     destroyCustomViewInActionBar()
                 } else {
-                    // Let the system handle the back press if search isn't active
                     isEnabled = false
                     requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
@@ -208,13 +212,23 @@ class FeedFragment : BaseStateFragment<FeedState>() {
             setOnItemLongClickListener(listenerStreamItem)
         }
 
+        continueWatchingAdapter = GroupieAdapter().apply {
+            setOnItemClickListener(listenerStreamItem)
+            setOnItemLongClickListener(listenerStreamItem)
+        }
+
+        feedBinding.continueWatchingList.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = continueWatchingAdapter
+        }
+
+        feedBinding.continueWatchingHeader.setOnClickListener {
+            NavigationHelper.openStatisticFragment(fm)
+        }
+
         feedBinding.itemsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                // Check if we scrolled to the top
-                if (newState == RecyclerView.SCROLL_STATE_IDLE &&
-                    !recyclerView.canScrollVertically(-1)
-                ) {
-
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && !recyclerView.canScrollVertically(-1)) {
                     if (tryGetNewItemsLoadedButton()?.isVisible == true) {
                         hideNewItemsLoaded(true)
                     }
@@ -224,6 +238,36 @@ class FeedFragment : BaseStateFragment<FeedState>() {
 
         feedBinding.itemsList.adapter = groupAdapter
         setupListViewMode()
+        loadContinueWatchingCarousel()
+    }
+
+    private fun loadContinueWatchingCarousel() {
+        historyRecordManager?.streamStatistics
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe({ entries ->
+                if (_feedBinding == null) return@subscribe
+                if (entries.isNullOrEmpty()) {
+                    feedBinding.continueWatchingContainer.isVisible = false
+                } else {
+                    feedBinding.continueWatchingContainer.isVisible = true
+                    val carouselItems = entries.take(10).map { entry ->
+                        StreamItem(
+                            org.schabi.newpipe.database.stream.model.StreamStateEntity(
+                                entry.streamEntity.uid,
+                                entry.latestAccessDate.time,
+                                entry.watchCount
+                            ),
+                            entry.streamEntity
+                        ).apply {
+                            itemVersion = StreamItem.ItemVersion.CARD
+                        }
+                    }
+                    continueWatchingAdapter.update(carouselItems)
+                }
+            }, {
+                _feedBinding?.continueWatchingContainer?.isVisible = false
+            })?.let { disposables.add(it) }
     }
 
     override fun onPause() {
@@ -234,10 +278,10 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     override fun onResume() {
         super.onResume()
         updateRelativeTimeViews()
+        loadContinueWatchingCarousel()
 
         if (updateListViewModeOnResume) {
             updateListViewModeOnResume = false
-
             setupListViewMode()
             if (viewModel.stateLiveData.value != null) {
                 handleResult(viewModel.stateLiveData.value!!)
@@ -251,7 +295,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     }
 
     private fun setupListViewMode() {
-        // does everything needed to setup the layouts for grid or list modes
         groupAdapter.spanCount = if (shouldUseGridLayout(context)) getGridSpanCountStreams(context) else 1
         feedBinding.itemsList.layoutManager = GridLayoutManager(requireContext(), groupAdapter.spanCount).apply {
             spanSizeLookup = groupAdapter.spanSizeLookup
@@ -276,23 +319,12 @@ class FeedFragment : BaseStateFragment<FeedState>() {
             getString(R.string.pull_to_refresh_key),
             true
         )
-
-        // Update the SwipeRefreshLayout state
         updateSwipeRefreshListener()
-
-        // Optionally disable the visual refresh indicator if disabled
-        if (!isPullToRefreshEnabled) {
-            feedBinding.swipeRefreshLayout.isEnabled = false
-        } else {
-            feedBinding.swipeRefreshLayout.isEnabled = true
-        }
+        feedBinding.swipeRefreshLayout.isEnabled = isPullToRefreshEnabled
     }
 
     private fun updateSwipeRefreshListener() {
-        // Remove existing listener first
         feedBinding.swipeRefreshLayout.setOnRefreshListener(null)
-
-        // Only add listener if pull-to-refresh is enabled
         if (isPullToRefreshEnabled) {
             feedBinding.swipeRefreshLayout.setOnRefreshListener { reloadContent() }
         }
@@ -326,7 +358,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 }
             }
 
-            // Long click listeners for enqueue functionality
             binding.playlistCtrlPlayPopupButton.setOnLongClickListener {
                 val playQueue = getPlayQueue()
                 if (playQueue.streams.isNotEmpty()) {
@@ -345,12 +376,10 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         }
     }
 
-    // Add method to create PlayQueue from feed items
     private fun getPlayQueue(startIndex: Int = 0): PlayQueue {
         val streamInfoItems = mutableListOf<StreamInfoItem>()
         val itemsToUse = if (isFilterEnabled) filteredItems else originalItems
 
-        // Extract StreamInfoItems from the current items
         for (item in itemsToUse) {
             streamInfoItems.add(item.streamWithState.stream.toStreamInfoItem())
         }
@@ -362,24 +391,18 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         }
     }
 
-    // /////////////////////////////////////////////////////////////////////////
-    // Menu
-    // /////////////////////////////////////////////////////////////////////////
-
     private fun Menu.isItemVisible(@IdRes itemId: Int): Boolean =
         findItem(itemId)?.let { it.isVisible } ?: false
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
 
-        activity.supportActionBar?.setDisplayShowTitleEnabled(true)
-        if (groupName == ""){
-            activity.supportActionBar?.setTitle(R.string.fragment_feed_title)
+        activity?.supportActionBar?.setDisplayShowTitleEnabled(true)
+        if (groupName == "") {
+            activity?.supportActionBar?.setTitle(R.string.fragment_feed_title)
         } else {
-            activity.supportActionBar?.title = groupName
+            activity?.supportActionBar?.title = groupName
         }
-
-//        activity.supportActionBar?.subtitle = groupName
 
         inflater.inflate(R.menu.menu_feed_fragment, menu)
         updateTogglePlayedItemsButton(menu.findItem(R.id.menu_item_feed_toggle_played_items))
@@ -421,13 +444,12 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     }
 
     override fun onDestroyView() {
-
-        if (activity.supportActionBar?.customView != null) {
+        if (activity?.supportActionBar?.customView != null) {
             destroyCustomViewInActionBar()
         }
-        // Ensure that all animations are canceled
         tryGetNewItemsLoadedButton()?.clearAnimation()
 
+        feedBinding.continueWatchingList.adapter = null
         feedBinding.itemsList.adapter = null
         _feedBinding = null
         playlistControlBinding?.let { binding ->
@@ -467,26 +489,21 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         )
     }
 
-    /*
-     Search
-     */
-
     private fun setupSearchInActionBar() {
-        val actionBar = activity.supportActionBar ?: return
+        val actionBar = activity?.supportActionBar ?: return
         val customView = layoutInflater.inflate(R.layout.feed_search_toolbar, null, false)
 
         actionBar.setCustomView(customView)
         actionBar.setDisplayShowCustomEnabled(true)
 
-        editText = activity.findViewById(R.id.toolbar_search_edit_text_feed)
+        editText = activity?.findViewById(R.id.toolbar_search_edit_text_feed)
         editText?.requestFocus()
 
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        imm?.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
 
-        // Hide the search menu item
         try {
-            activity.findViewById<View>(R.id.action_search_feed)?.visibility = View.GONE
+            activity?.findViewById<View>(R.id.action_search_feed)?.visibility = View.GONE
         } catch (e: Exception) {
             // ignore
         }
@@ -512,39 +529,35 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     }
 
     private fun setupTouchListeners(view: View) {
-        // Skip if this is our EditText
         if (view == editText) {
             return
         }
 
-        // For other views, set a touch listener to clear focus
         if (view !is EditText) {
             view.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_DOWN && editText?.hasFocus() == true) {
                     editText?.clearFocus()
-                    val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    imm.hideSoftInputFromWindow(editText?.windowToken, 0)
+                    val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    imm?.hideSoftInputFromWindow(editText?.windowToken, 0)
                 }
                 false
             }
         }
 
-        // If it's a ViewGroup, apply to all children
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 setupTouchListeners(view.getChildAt(i))
             }
         }
 
-        // Add specific listener for the RecyclerView
         if (view.id == R.id.items_list) {
             val recyclerView = view as RecyclerView
             recyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
                 override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
                     if (e.action == MotionEvent.ACTION_DOWN && editText?.hasFocus() == true) {
                         editText?.clearFocus()
-                        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(editText?.windowToken, 0)
+                        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                        imm?.hideSoftInputFromWindow(editText?.windowToken, 0)
                     }
                     return false
                 }
@@ -565,21 +578,18 @@ class FeedFragment : BaseStateFragment<FeedState>() {
             for (item in originalItems) {
                 val stream = item.streamWithState.stream
                 if (stream.title.lowercase().contains(text.lowercase()) ||
-                    stream.uploader.lowercase().contains(text.lowercase()) == true) {
+                    stream.uploader.lowercase().contains(text.lowercase())) {
                     filteredItems.add(item)
                 }
             }
         }
 
-        // Use synchronous update to avoid race conditions during rapid filtering
         try {
             groupAdapter.update(if (isFilterEnabled) filteredItems else originalItems)
         } catch (e: Exception) {
-            // Fallback to async if needed
             groupAdapter.updateAsync(if (isFilterEnabled) filteredItems else originalItems, null)
         }
 
-        // Always scroll to top when filter changes
         feedBinding.itemsList.post {
             feedBinding.itemsList.layoutManager?.scrollToPosition(0)
         }
@@ -588,24 +598,19 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     private fun clearFilter() {
         isFilterEnabled = false
         filteredItems.clear()
-        // Cancel any ongoing diff operations before starting a new one
         try {
-            // Update synchronously to avoid race conditions
             groupAdapter.update(originalItems)
         } catch (e: Exception) {
-            // Fallback to async with proper synchronization
             groupAdapter.updateAsync(originalItems, null)
         }
-        // Always scroll to top when clearing filter
         feedBinding.itemsList.post {
             feedBinding.itemsList.layoutManager?.scrollToPosition(0)
         }
     }
 
     private fun destroyCustomViewInActionBar() {
-        val actionBar = activity.supportActionBar ?: return
+        val actionBar = activity?.supportActionBar ?: return
 
-        // Remove text watcher first to prevent additional filtering during cleanup
         try {
             editText?.removeTextChangedListener(textWatcher)
         } catch (e: Exception) {
@@ -615,23 +620,17 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         actionBar.setCustomView(null)
         actionBar.setDisplayShowCustomEnabled(false)
 
-        val searchLocal = activity.findViewById<View>(R.id.action_search_feed)
+        val searchLocal = activity?.findViewById<View>(R.id.action_search_feed)
         searchLocal?.visibility = View.VISIBLE
 
-        // Clear filter after removing listeners
         clearFilter()
 
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
+        val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+        activity?.window?.decorView?.windowToken?.let { imm?.hideSoftInputFromWindow(it, 0) }
 
         editText = null
         searchClear = null
     }
-
-
-    // //////////////////////////////////////////////////////////////////////////
-    // Handling
-    // //////////////////////////////////////////////////////////////////////////
 
     override fun showLoading() {
         super.showLoading()
@@ -696,14 +695,13 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         feedBinding.loadingProgressBar.isIndeterminate = isIndeterminate ||
             (progressState.maxProgress > 0 && progressState.currentProgress == 0)
         feedBinding.loadingProgressBar.progress = progressState.currentProgress
-
         feedBinding.loadingProgressBar.max = progressState.maxProgress
     }
 
     private fun showInfoItemDialog(item: StreamInfoItem) {
         val context = context
-        val activity: Activity? = getActivity()
-        if (context == null || context.resources == null || activity == null) return
+        val activity: Activity? = activity
+        if (context == null || activity == null) return
 
         InfoItemDialog.Builder(activity, context, this, item).create().show()
     }
@@ -714,7 +712,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 val stream = item.streamWithState.stream
 
                 if (autoBackgroundPlaying) {
-                    // Find the index of the clicked item
                     val clickedIndex = groupAdapter.getAdapterPosition(item)
                     val playQueue = getPlayQueue(clickedIndex)
 
@@ -749,7 +746,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         }
         loadedState.items.forEach { it.itemVersion = itemVersion }
 
-        // Store original items for filtering
         originalItems.clear()
         originalItems.addAll(loadedState.items)
         filteredItems.clear()
@@ -757,7 +753,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
 
         playlistControlBinding?.root?.isVisible = loadedState.items.isNotEmpty()
 
-        // This need to be saved in a variable as the update occurs async
         val oldOldestSubscriptionUpdate = oldestSubscriptionUpdate
 
         groupAdapter.updateAsync(loadedState.items, false) {
@@ -782,7 +777,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         if (oldestSubscriptionUpdate != loadedState.oldestUpdate ||
             (oldestSubscriptionUpdate == null && loadedState.oldestUpdate == null)
         ) {
-            // ignore errors if they have already been handled for the current update
             handleItemsErrors(loadedState.itemsErrors)
         }
         oldestSubscriptionUpdate = loadedState.oldestUpdate
@@ -824,7 +818,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                         },
                         { throwable -> Log.e(TAG, "Unable to process", throwable) }
                     )
-                return // this will be called on the remaining errors by handleFeedNotAvailable()
+                return
             }
         }
     }
@@ -884,12 +878,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         )
     }
 
-    /**
-     * Highlights all items that are after the specified time
-     */
     private fun highlightNewItemsAfter(updateTime: OffsetDateTime) {
         var highlightCount = 0
-
         var doCheck = true
 
         for (i in 0 until groupAdapter.itemCount) {
@@ -900,13 +890,11 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 resolveDrawable(ctx, android.R.attr.selectableItemBackground)
             }
             if (doCheck) {
-                // If the uploadDate is null or true we should highlight the item
                 if (item.streamWithState.stream.uploadDate?.isAfter(updateTime) != false) {
                     highlightCount++
 
                     typeface = Typeface.DEFAULT_BOLD
                     backgroundSupplier = { ctx: Context ->
-                        // Merge the drawables together. Otherwise we would lose the "select" effect
                         LayerDrawable(
                             arrayOf(
                                 resolveDrawable(ctx, R.attr.dashed_border),
@@ -915,15 +903,10 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                         )
                     }
                 } else {
-                    // Decreases execution time due to the order of the items (newest always on top)
-                    // Once a item is is before the updateTime we can skip all following items
                     doCheck = false
                 }
             }
 
-            // The highlighter has to be always set
-            // When it's only set on items that are highlighted it will highlight all items
-            // due to the fact that itemRoot is getting recycled
             item.execBindEnd = Consumer { viewBinding ->
                 val context = viewBinding.itemRoot.context
                 viewBinding.itemRoot.background = backgroundSupplier.invoke(context)
@@ -931,9 +914,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
             }
         }
 
-        // Force updates all items so that the highlighting is correct
-        // If this isn't done visible items that are already highlighted will stay in a highlighted
-        // state until the user scrolls them out of the visible area which causes a update/bind-call
         groupAdapter.notifyItemRangeChanged(
             0,
             minOf(groupAdapter.itemCount, maxOf(highlightCount, lastNewItemsCount))
@@ -953,17 +933,13 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 250L,
                 delay = 100,
                 execOnEnd = {
-                    // Disabled animations would result in immediately hiding the button
-                    // after it showed up
                     try {
                         if (DeviceUtils.hasAnimationsAnimatorDurationEnabled(context)) {
-                            // Hide the new items-"popup" after 10s
                             hideNewItemsLoaded(true, 10000)
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-
                 }
             )
     }
@@ -976,8 +952,6 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 200,
                 delay = delay,
                 execOnEnd = {
-                    // Make the layout invisible so that the onScroll toTop method
-                    // only does necessary work
                     tryGetNewItemsLoadedButton()?.isVisible = false
                 }
             )
@@ -986,30 +960,22 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         }
     }
 
-    /**
-     * The view/button can be disposed/set to null under certain circumstances.
-     * E.g. when the animation is still in progress but the view got destroyed.
-     * This method is a helper for such states and can be used in affected code blocks.
-     */
     private fun tryGetNewItemsLoadedButton(): Button? {
         return _feedBinding?.newItemsLoadedButton
     }
-
-    // /////////////////////////////////////////////////////////////////////////
-    // Load Service Handling
-    // /////////////////////////////////////////////////////////////////////////
 
     override fun doInitialLoadLogic() {}
 
     override fun reloadContent() {
         hideNewItemsLoaded(false)
 
-        getActivity()?.startService(
+        activity?.startService(
             Intent(requireContext(), FeedLoadService::class.java).apply {
                 putExtra(FeedLoadService.EXTRA_GROUP_ID, groupId)
             }
         )
         listState = null
+        loadContinueWatchingCarousel()
     }
 
     companion object {
