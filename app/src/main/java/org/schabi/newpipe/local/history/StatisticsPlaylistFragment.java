@@ -84,6 +84,13 @@ public class StatisticsPlaylistFragment
     };
 
     private List<StreamStatisticsEntry> processResult(final List<StreamStatisticsEntry> results) {
+        final List<StreamStatisticsEntry> filtered = new ArrayList<>();
+        for (final StreamStatisticsEntry entry : results) {
+            if (entry != null && entry.getStreamEntity() != null) {
+                filtered.add(entry);
+            }
+        }
+
         final Comparator<StreamStatisticsEntry> comparator;
         switch (sortMode) {
             case LAST_PLAYED:
@@ -93,10 +100,10 @@ public class StatisticsPlaylistFragment
                 comparator = Comparator.comparingLong(StreamStatisticsEntry::getWatchCount);
                 break;
             default:
-                return null;
+                return filtered;
         }
-        Collections.sort(results, comparator.reversed());
-        return results;
+        Collections.sort(filtered, comparator.reversed());
+        return filtered;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -210,7 +217,7 @@ public class StatisticsPlaylistFragment
                 // ignore
             }
             editText.addTextChangedListener(textWatcher);
-        }else {
+        } else {
             return super.onOptionsItemSelected(item);
         }
         return true;
@@ -254,7 +261,7 @@ public class StatisticsPlaylistFragment
     public void onDestroyView() {
         super.onDestroyView();
 
-        if(Objects.requireNonNull(activity.getSupportActionBar()).getCustomView() != null){
+        if (Objects.requireNonNull(activity.getSupportActionBar()).getCustomView() != null) {
             destroyCustomViewInActionBar();
         }
 
@@ -327,7 +334,9 @@ public class StatisticsPlaylistFragment
             return;
         }
 
-        playlistControlBinding.getRoot().setVisibility(View.VISIBLE);
+        if (playlistControlBinding != null) {
+            playlistControlBinding.getRoot().setVisibility(View.VISIBLE);
+        }
 
         itemListAdapter.clearStreamItemList();
 
@@ -342,13 +351,17 @@ public class StatisticsPlaylistFragment
             itemsListState = null;
         }
 
-        playlistControlBinding.playlistCtrlPlayAllButton.setOnClickListener(view ->
-                NavigationHelper.playOnMainPlayer(activity, getPlayQueue()));
-        playlistControlBinding.playlistCtrlPlayPopupButton.setOnClickListener(view ->
-                NavigationHelper.playOnPopupPlayer(activity, getPlayQueue(), false));
-        playlistControlBinding.playlistCtrlPlayBgButton.setOnClickListener(view ->
-                NavigationHelper.playOnBackgroundPlayer(activity, getPlayQueue(), false));
-        headerBinding.sortButton.setOnClickListener(view -> toggleSortMode());
+        if (playlistControlBinding != null) {
+            playlistControlBinding.playlistCtrlPlayAllButton.setOnClickListener(view ->
+                    NavigationHelper.playOnMainPlayer(activity, getPlayQueue()));
+            playlistControlBinding.playlistCtrlPlayPopupButton.setOnClickListener(view ->
+                    NavigationHelper.playOnPopupPlayer(activity, getPlayQueue(), false));
+            playlistControlBinding.playlistCtrlPlayBgButton.setOnClickListener(view ->
+                    NavigationHelper.playOnBackgroundPlayer(activity, getPlayQueue(), false));
+        }
+        if (headerBinding != null) {
+            headerBinding.sortButton.setOnClickListener(view -> toggleSortMode());
+        }
 
         hideLoading();
     }
@@ -373,14 +386,17 @@ public class StatisticsPlaylistFragment
         if (sortMode == StatisticSortMode.LAST_PLAYED) {
             sortMode = StatisticSortMode.MOST_PLAYED;
             setTitle(getString(R.string.title_most_played));
-            headerBinding.sortButtonIcon.setImageResource(R.drawable.ic_history);
-            headerBinding.sortButtonText.setText(R.string.title_last_played);
+            if (headerBinding != null) {
+                headerBinding.sortButtonIcon.setImageResource(R.drawable.ic_history);
+                headerBinding.sortButtonText.setText(R.string.title_last_played);
+            }
         } else {
             sortMode = StatisticSortMode.LAST_PLAYED;
             setTitle(getString(R.string.title_last_played));
-            headerBinding.sortButtonIcon.setImageResource(
-                R.drawable.ic_filter_list);
-            headerBinding.sortButtonText.setText(R.string.title_most_played);
+            if (headerBinding != null) {
+                headerBinding.sortButtonIcon.setImageResource(R.drawable.ic_filter_list);
+                headerBinding.sortButtonText.setText(R.string.title_most_played);
+            }
         }
         startLoading(true);
     }
@@ -397,7 +413,6 @@ public class StatisticsPlaylistFragment
             final InfoItemDialog.Builder dialogBuilder =
                     new InfoItemDialog.Builder(getActivity(), context, this, infoItem);
 
-            // set entries in the middle; the others are added automatically
             dialogBuilder
                     .addEntry(StreamDialogDefaultEntry.DELETE)
                     .setAction(
@@ -459,16 +474,16 @@ public class StatisticsPlaylistFragment
         return new SinglePlayQueue(streamInfoItems, index);
     }
 
-
     @Override
     public boolean onBackPressed() {
-        if(Objects.requireNonNull(activity.getSupportActionBar()).getCustomView() != null){
+        if (Objects.requireNonNull(activity.getSupportActionBar()).getCustomView() != null) {
             destroyCustomViewInActionBar();
             return true;
         }
         return false;
     }
-    public void destroyCustomViewInActionBar(){
+
+    public void destroyCustomViewInActionBar() {
         ActionBar actionBar = activity.getSupportActionBar();
         assert actionBar != null;
         actionBar.setCustomView(null);
@@ -479,8 +494,8 @@ public class StatisticsPlaylistFragment
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        if(itemListAdapter != null) {
+
+        if (itemListAdapter != null) {
             itemListAdapter.clearFilter();
         }
     }
