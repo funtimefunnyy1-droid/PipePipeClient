@@ -822,17 +822,6 @@ public final class VideoDetailFragment
 
     private View.OnTouchListener getOnControlsTouchListener() {
         return (view, motionEvent) -> {
-//            if (!PreferenceManager.getDefaultSharedPreferences(activity)
-//                    .getBoolean(getString(R.string.show_hold_to_append_key), true)) {
-//                return false;
-//            }
-//
-//            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                animate(binding.touchAppendDetail, true, 250, AnimationType.ALPHA,
-//                        0, () ->
-//                                animate(binding.touchAppendDetail, false, 1500,
-//                                        AnimationType.ALPHA, 1000));
-//            }
             return false;
         };
     }
@@ -919,9 +908,6 @@ public final class VideoDetailFragment
         final int currentItem = binding.viewPager.getCurrentItem();
         final String currentPage = pageAdapter.getItemTitle(currentItem);
         if (COMMENTS_TAB_TAG.equals(currentPage)) {
-            // Delegate to the comments tab itself: it owns the replies in its child FragmentManager
-            // and pops them on back. (Previously this popped the parent FM directly, which could
-            // recreate a comment fragment in a destroyed container -> crash when going to pop-up.)
             final Fragment tab = pageAdapter.getItem(currentItem);
             if (tab instanceof BackPressable) {
                 return ((BackPressable) tab).onBackPressed();
@@ -1098,30 +1084,25 @@ public final class VideoDetailFragment
         }
 
         if (showRelatedItems && binding.relatedItemsLayout == null) {
-            // temp empty fragment. will be updated in handleResult
             try {
                 pageAdapter.addFragment(EmptyFragment.newInstance(false), RELATED_TAB_TAG);
                 tabIcons.add(R.drawable.ic_art_track);
                 tabContentDescriptions.add(R.string.related_items_tab_description);
             } catch (IllegalStateException e) {
-                // Fragment already added
                 Log.e(TAG, "initTabs() error adding related tab", e);
             }
         }
 
         if (showDescription) {
-            // temp empty fragment. will be updated in handleResult
             try {
                 pageAdapter.addFragment(EmptyFragment.newInstance(false), DESCRIPTION_TAB_TAG);
                 tabIcons.add(R.drawable.ic_description);
                 tabContentDescriptions.add(R.string.description_tab_description);
             } catch (IllegalStateException e) {
-                // Fragment already added
                 Log.e(TAG, "initTabs() error adding description tab", e);
             }
         }
         if (shouldShowSponsorBlock()) {
-            // temp empty fragment. will be updated in handleResult
             pageAdapter.addFragment(EmptyFragment.newInstance(false), SPONSOR_BLOCK_TAB_TAG);
             tabIcons.add(R.drawable.ic_sponsor_block_enable);
             tabContentDescriptions.add(R.string.sponsor_block);
@@ -1139,16 +1120,9 @@ public final class VideoDetailFragment
             }
             updateTabIconsAndContentDescriptions();
         }
-        // the page adapter now contains tabs: show the tab layout
         updateTabLayoutVisibility();
     }
 
-    /**
-     * To be called whenever {@link #pageAdapter} is modified, since that triggers a refresh in
-     * {@link FragmentVideoDetailBinding#tabLayout} resetting all tab's icons and content
-     * descriptions. This reads icons from {@link #tabIcons} and content descriptions from
-     * {@link #tabContentDescriptions}, which are all set in {@link #initTabs()}.
-     */
     private void updateTabIconsAndContentDescriptions() {
         for (int i = 0; i < tabIcons.size(); ++i) {
             final TabLayout.Tab tab = binding.tabLayout.getTabAt(i);
@@ -1163,16 +1137,15 @@ public final class VideoDetailFragment
         if (info.isRoundPlayStream() || (showRelatedItems && info.isSupportRelatedItems())) {
             try {
                 if (binding.relatedItemsLayout == null) { // phone
-                    pageAdapter.updateItem(RELATED_TAB_TAG, RelatedItemsFragment.getInstance(info));
+                    pageAdapter.updateItem(RELATED_TAB_TAG, EmptyFragment.newInstance(false));
                 } else { // tablet + TV
                     getChildFragmentManager().beginTransaction()
-                            .replace(R.id.relatedItemsLayout, RelatedItemsFragment.getInstance(info))
+                            .replace(R.id.relatedItemsLayout, EmptyFragment.newInstance(false))
                             .commitAllowingStateLoss();
                     binding.relatedItemsLayout.setVisibility(
                             isPlayerAvailable() && player.isFullscreen() ? View.GONE : View.VISIBLE);
                 }
             } catch (IllegalStateException e) {
-                // Fragment already added
                 Log.e(TAG, "updateTabs() error updating related tab", e);
             }
         }
@@ -1211,7 +1184,6 @@ public final class VideoDetailFragment
             if (isLiveStream
                     || (info.getServiceId() == ServiceList.BiliBili.getServiceId()
                             && !isFirstP(info.getId()))) {
-                // exclude for live streams or BiliBili multi-part videos
                 int index = pageAdapter.getItemPositionByTitle(SPONSOR_BLOCK_TAB_TAG);
                 if(index != -1){
                     pageAdapter.removeItem(index);
@@ -1232,7 +1204,6 @@ public final class VideoDetailFragment
         }
 
         binding.viewPager.setVisibility(View.VISIBLE);
-        // make sure the tab layout is visible
         updateTabLayoutVisibility();
         pageAdapter.notifyDataSetUpdate();
         updateTabIconsAndContentDescriptions();
@@ -1273,16 +1244,12 @@ public final class VideoDetailFragment
     public void updateTabLayoutVisibility() {
 
         if (binding == null) {
-            //If binding is null we do not need to and should not do anything with its object(s)
             return;
         }
 
         if (pageAdapter.getCount() < 2 || binding.viewPager.getVisibility() != View.VISIBLE) {
-            // hide tab layout if there is only one tab or if the view pager is also hidden
             binding.tabLayout.setVisibility(View.GONE);
         } else {
-            // call `post()` to be sure `viewPager.getHitRect()`
-            // is up to date and not being currently recomputed
             binding.tabLayout.post(() -> {
                 if (getContext() != null) {
                     final Rect pagerHitRect = new Rect();
@@ -1293,17 +1260,14 @@ public final class VideoDetailFragment
                             WindowManager.class)).getDefaultDisplay().getSize(displaySize);
 
                     final int viewPagerVisibleHeight = displaySize.y - pagerHitRect.top;
-                    // see TabLayout.DEFAULT_HEIGHT, which is equal to 48dp
                     final float tabLayoutHeight = TypedValue.applyDimension(
                             TypedValue.COMPLEX_UNIT_DIP, 48, getResources().getDisplayMetrics());
 
                     if (viewPagerVisibleHeight > tabLayoutHeight * 2) {
-                        // no translation at all when viewPagerVisibleHeight > tabLayout.height * 3
                         binding.tabLayout.setTranslationY(
                                 Math.max(0, tabLayoutHeight * 3 - viewPagerVisibleHeight));
                         binding.tabLayout.setVisibility(View.VISIBLE);
                     } else {
-                        // view pager is not visible enough
                         binding.tabLayout.setVisibility(View.GONE);
                     }
                 }
@@ -1313,7 +1277,6 @@ public final class VideoDetailFragment
 
     public void scrollToTop() {
         binding.appBarLayout.setExpanded(true, true);
-        // notify tab layout of scrolling
         updateTabLayoutVisibility();
     }
 
@@ -1322,8 +1285,6 @@ public final class VideoDetailFragment
     //////////////////////////////////////////////////////////////////////////*/
 
     private void toggleFullscreenIfInFullscreenMode() {
-        // If a user watched video inside fullscreen mode and than chose another player
-        // return to non-fullscreen mode
         if (isPlayerAvailable() && player.isFullscreen()) {
             player.toggleFullscreen();
         }
@@ -1336,7 +1297,6 @@ public final class VideoDetailFragment
         toggleFullscreenIfInFullscreenMode();
 
         if (isPlayerAvailable()) {
-            // FIXME Workaround #7427
             player.setRecovery();
         }
 
@@ -1355,64 +1315,38 @@ public final class VideoDetailFragment
             return;
         }
 
-        // See UI changes while remote playQueue changes
         if (!isPlayerAvailable()) {
             playerHolder.startService(false, this);
         } else {
-            // FIXME Workaround #7427
             player.setRecovery();
         }
 
         toggleFullscreenIfInFullscreenMode();
 
         final PlayQueue queue = setupPlayQueueForIntent(append);
-        if (append) { //resumePlayback: false
+        if (append) {
             NavigationHelper.enqueueOnPlayer(activity, queue, PlayerType.POPUP);
         } else {
             NavigationHelper.playOnPopupPlayer(activity, queue, true);
         }
     }
 
-    /**
-     * Opens the video player, in fullscreen if needed. In order to open fullscreen, the activity
-     * is toggled to landscape orientation (which will then cause fullscreen mode).
-     *
-     * @param directlyFullscreenIfApplicable whether to open fullscreen if we are not already
-     *                                       in landscape and screen orientation is locked
-     */
     public void openVideoPlayer(final boolean directlyFullscreenIfApplicable) {
         if (directlyFullscreenIfApplicable
                 && !DeviceUtils.isLandscape(requireContext())
                 && PlayerHelper.globalScreenOrientationLocked(requireContext())) {
-            // Make sure the bottom sheet turns out expanded. When this code kicks in the bottom
-            // sheet could not have fully expanded yet, and thus be in the STATE_SETTLING state.
-            // When the activity is rotated, and its state is saved and then restored, the bottom
-            // sheet would forget what it was doing, since even if STATE_SETTLING is restored, it
-            // doesn't tell which state it was settling to, and thus the bottom sheet settles to
-            // STATE_COLLAPSED. This can be solved by manually setting the state that will be
-            // restored (i.e. bottomSheetState) to STATE_EXPANDED.
             bottomSheetState = BottomSheetBehavior.STATE_EXPANDED;
-            // toggle landscape in order to open directly in fullscreen
             onScreenRotationButtonClicked();
         }
 
         openMainPlayer();
     }
 
-    /**
-     * If the option to start directly fullscreen is enabled, calls
-     * {@link #openVideoPlayer(boolean)} with {@code directlyFullscreenIfApplicable = true}, so that
-     * if the user is not already in landscape and he has screen orientation locked the activity
-     * rotates and fullscreen starts. Otherwise, if the option to start directly fullscreen is
-     * disabled, calls {@link #openVideoPlayer(boolean)} with {@code directlyFullscreenIfApplicable
-     * = false}, hence preventing it from going directly fullscreen.
-     */
     public void openVideoPlayerAutoFullscreen() {
         openVideoPlayer(PlayerHelper.isStartMainPlayerFullscreenEnabled(requireContext()));
     }
 
     private void openNormalBackgroundPlayer(final boolean append) {
-        // See UI changes while remote playQueue changes
         if (!isPlayerAvailable()) {
             playerHolder.startService(false, this);
         }
@@ -1438,8 +1372,6 @@ public final class VideoDetailFragment
         final PlayQueue queue = setupPlayQueueForIntent(false);
         PlaybackStartupTrace.mark(pendingStartupTraceId, "play_queue_ready");
 
-        // Video view can have elements visible from popup,
-        // We hide it here but once it ready the view will be shown in handleIntent()
         if (playerService.getView() != null) {
             playerService.getView().setVisibility(View.GONE);
         }
@@ -1451,13 +1383,6 @@ public final class VideoDetailFragment
         ContextCompat.startForegroundService(activity, playerIntent);
     }
 
-    /**
-     * When the video detail fragment is already showing details for a video and the user opens a
-     * new one, the video detail fragment changes all of its old data to the new stream, so if there
-     * is a video player currently open it should be hidden. This method does exactly that. If
-     * autoplay is enabled, the underlying player is not stopped completely, since it is going to
-     * be reused in a few milliseconds and the flickering would be annoying.
-     */
     private void hideMainPlayerOnLoadingNewStream() {
         if (!isPlayerServiceAvailable()
                 || playerService.getView() == null
@@ -1480,7 +1405,6 @@ public final class VideoDetailFragment
         }
 
         PlayQueue queue = playQueue;
-        // Size can be 0 because queue removes bad stream automatically when error occurs
         if (queue == null || queue.isEmpty()) {
             queue = new SinglePlayQueue(currentInfo);
         }
@@ -1510,8 +1434,6 @@ public final class VideoDetailFragment
                 ));
     }
 
-    // This method overrides default behaviour when setAutoPlay() is called.
-    // Don't auto play if the user selected an external player or disabled it in settings
     private boolean isAutoplayEnabled() {
         return autoPlayEnabled
                 && (!isPlayerAvailable() || player.videoPlayerSelected())
@@ -1524,13 +1446,11 @@ public final class VideoDetailFragment
             return;
         }
 
-        // Check if viewHolder already contains a child
         if (player.getRootView().getParent() != binding.playerPlaceholder) {
             playerService.removeViewFromParent();
         }
         setHeightThumbnail();
 
-        // Prevent from re-adding a view multiple times
         if (player.getRootView().getParent() == null) {
             binding.playerPlaceholder.addView(player.getRootView());
             if (currentInfo != null) {
@@ -1571,13 +1491,6 @@ public final class VideoDetailFragment
                 }
             };
 
-    /**
-     * Method which controls the size of thumbnail and the size of main player inside
-     * a layout with thumbnail. It decides what height the player should have in both
-     * screen orientations. It knows about multiWindow feature
-     * and about videos with aspectRatio ZOOM (the height for them will be a bit higher,
-     * {@link #MAX_PLAYER_HEIGHT})
-     */
     private void setHeightThumbnail() {
         final DisplayMetrics metrics = getResources().getDisplayMetrics();
         final boolean isPortrait = metrics.heightPixels > metrics.widthPixels;
@@ -1587,7 +1500,6 @@ public final class VideoDetailFragment
             final int height = (DeviceUtils.isInMultiWindow(activity)
                     ? requireView()
                     : activity.getWindow().getDecorView()).getHeight();
-            // Height is zero when the view is not yet displayed like after orientation change
             if (height != 0) {
                 setHeightThumbnail(height, metrics);
             } else {
@@ -1709,11 +1621,10 @@ public final class VideoDetailFragment
         super.handleError();
         setErrorImage(R.drawable.not_available_monkey);
 
-        if (binding.relatedItemsLayout != null) { // hide related streams for tablets
+        if (binding.relatedItemsLayout != null) {
             binding.relatedItemsLayout.setVisibility(View.INVISIBLE);
         }
 
-        // hide comments / related streams / description tabs
         binding.viewPager.setVisibility(View.GONE);
         binding.tabLayout.setVisibility(View.GONE);
     }
@@ -1730,11 +1641,9 @@ public final class VideoDetailFragment
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         break;
                     case ACTION_PLAYER_STARTED:
-                        // If the state is not hidden we don't need to show the mini player
                         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
                             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                         }
-                        // Rebound to the service if it was closed via notification or mini player
                         if (!playerHolder.isBound()) {
                             playerHolder.startService(
                                     false, VideoDetailFragment.this);
@@ -1770,7 +1679,6 @@ public final class VideoDetailFragment
         }
     }
 
-
     /*//////////////////////////////////////////////////////////////////////////
     // Orientation listener
     //////////////////////////////////////////////////////////////////////////*/
@@ -1780,10 +1688,6 @@ public final class VideoDetailFragment
             toggleFullscreenIfInFullscreenMode();
         }
 
-        // This will show systemUI and pause the player.
-        // User can tap on Play button and video will be in fullscreen mode again
-        // Note for tablet: trying to avoid orientation changes since it's not easy
-        // to physically rotate the tablet every time
         if (activity != null && !DeviceUtils.isTablet(activity)) {
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         }
@@ -1801,7 +1705,6 @@ public final class VideoDetailFragment
 
         super.showLoading();
 
-        //if data is already cached, transition from VISIBLE -> INVISIBLE -> VISIBLE is not required
         if (!ExtractorHelper.isCached(serviceId, url, InfoItem.InfoType.STREAM)) {
             binding.detailContentRootHiding.setVisibility(View.INVISIBLE);
         }
@@ -1945,8 +1848,6 @@ public final class VideoDetailFragment
         }
 
         if (!info.getErrors().isEmpty()) {
-            // Bandcamp fan pages are not yet supported and thus a ContentNotAvailableException is
-            // thrown. This is not an error and thus should not be shown to the user.
             for (final Throwable throwable : info.getErrors()) {
                 if (throwable instanceof ContentNotSupportedException
                         && "Fan pages are not supported".equals(throwable.getMessage())) {
@@ -2046,14 +1947,11 @@ public final class VideoDetailFragment
                     || playQueue.getItem().getRecoveryPosition() == RECOVERY_UNSET) {
                 binding.positionView.setVisibility(View.INVISIBLE);
                 binding.detailPositionView.setVisibility(View.GONE);
-                // TODO: Remove this check when separation of concerns is done.
-                //  (live streams weren't getting updated because they are mixed)
                 if (!info.getStreamType().equals(StreamType.LIVE_STREAM)
                         && !info.getStreamType().equals(StreamType.AUDIO_LIVE_STREAM)) {
                     return;
                 }
             } else {
-                // Show saved position from backStack if user allows it
                 showPlaybackProgress(playQueue.getItem().getRecoveryPosition(),
                         playQueue.getItem().getDuration() * 1000);
                 animate(binding.positionView, true, 500);
@@ -2063,8 +1961,6 @@ public final class VideoDetailFragment
         }
         final HistoryRecordManager recordManager = new HistoryRecordManager(requireContext());
 
-        // TODO: Separate concerns when updating database data.
-        //  (move the updating part to when the loading happens)
         positionSubscriber = recordManager.loadStreamState(info)
                 .subscribeOn(Schedulers.io())
                 .onErrorComplete()
@@ -2086,8 +1982,6 @@ public final class VideoDetailFragment
     private void showPlaybackProgress(final long progress, final long duration) {
         final int progressSeconds = (int) TimeUnit.MILLISECONDS.toSeconds(progress);
         final int durationSeconds = (int) TimeUnit.MILLISECONDS.toSeconds(duration);
-        // If the old and the new progress values have a big difference then use
-        // animation. Otherwise don't because it affects CPU
         final boolean shouldAnimate = Math.abs(binding.positionView.getProgress()
                 - progressSeconds) > 2;
         binding.positionView.setMax(durationSeconds);
@@ -2119,10 +2013,6 @@ public final class VideoDetailFragment
                     + title + "], playQueue = [" + playQueue + "]");
         }
 
-        // This should be the only place where we push data to stack.
-        // It will allow to have live instance of PlayQueue with actual information about
-        // deleted/added items inside Channel/Playlist queue and makes possible to have
-        // a history of played items
         @Nullable final StackItem stackPeek = stack.peek();
         if (stackPeek != null && !stackPeek.getPlayQueue().equals(queue)) {
             @Nullable final PlayQueueItem playQueueItem = queue.getItem();
@@ -2130,15 +2020,11 @@ public final class VideoDetailFragment
                 stack.push(new StackItem(playQueueItem.getServiceId(), playQueueItem.getUrl(),
                         playQueueItem.getTitle(), queue));
                 return;
-            } // else continue below
+            }
         }
 
         @Nullable final StackItem stackWithQueue = findQueueInStack(queue);
         if (stackWithQueue != null) {
-            // On every MainPlayer service's destroy() playQueue gets disposed and
-            // no longer able to track progress. That's why we update our cached disposed
-            // queue with the new one that is active and have the same history.
-            // Without that the cached playQueue will have an old recovery position
             stackWithQueue.setPlayQueue(queue);
         }
     }
@@ -2167,7 +2053,6 @@ public final class VideoDetailFragment
     public void onProgressUpdate(final int currentProgress,
                                  final int duration,
                                  final int bufferPercent) {
-        // Progress updates every second even if media is paused. It's useless until playing
         if (!player.isPlaying() || playQueue == null) {
             return;
         }
@@ -2198,15 +2083,9 @@ public final class VideoDetailFragment
         }
         final StackItem item = findQueueInStack(queue);
         if (item != null) {
-            // When PlayQueue can have multiple streams (PlaylistPlayQueue or ChannelPlayQueue)
-            // every new played stream gives new title and url.
-            // StackItem contains information about first played stream. Let's update it here
             item.setTitle(info.getName());
             item.setUrl(info.getUrl());
         }
-        // They are not equal when user watches something in popup while browsing in fragment and
-        // then changes screen orientation. In that case the fragment will set itself as
-        // a service listener and will receive initial call to onMetadataUpdate()
         if (!queue.equals(playQueue)) {
             return;
         }
@@ -2219,16 +2098,12 @@ public final class VideoDetailFragment
         currentInfo = info;
         setInitialData(info.getServiceId(), info.getUrl(), info.getName(), queue);
         setAutoPlay(false);
-        // Delay execution just because it freezes the main thread, and while playing
-        // next/previous video you see visual glitches
-        // (when non-vertical video goes after vertical video)
         prepareAndHandleInfoIfNeededAfterDelay(info, true, 200);
     }
 
     @Override
     public void onPlayerError(final PlaybackException error, final boolean isCatchableException) {
         if (!isCatchableException) {
-            // Properly exit from fullscreen
             toggleFullscreenIfInFullscreenMode();
             hideMainPlayerOnLoadingNewStream();
         }
@@ -2282,13 +2157,11 @@ public final class VideoDetailFragment
         final boolean isTablet    = DeviceUtils.isTablet(activity);
         final boolean autoLocked  = globalScreenOrientationLocked(activity);
 
-        // 1. 平板且（系统可自动旋转 或 当前已横），直接切播放器全屏/非全屏
         if (isTablet && (!autoLocked || isLandscape)) {
             player.toggleFullscreen();
             return;
         }
 
-        // 2. 手机 or 平板但系统锁定了自动旋转，就去真正设置屏幕方向
         if (!autoLocked) {
             if (isLandscape) {
                 player.toggleFullscreen();
@@ -2296,7 +2169,6 @@ public final class VideoDetailFragment
                 activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
             }
         } else {
-            // 系统锁定时，再用“强制模式”来切
             activity.setRequestedOrientation(
                     isLandscape
                             ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -2305,9 +2177,6 @@ public final class VideoDetailFragment
         }
     }
 
-    /*
-     * Will scroll down to description view after long click on moreOptionsButton
-     * */
     @Override
     public void onMoreOptionsLongClicked() {
         final CoordinatorLayout.LayoutParams params =
@@ -2338,7 +2207,6 @@ public final class VideoDetailFragment
             return;
         }
 
-        // Prevent jumping of the player on devices with cutout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             activity.getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
@@ -2358,7 +2226,6 @@ public final class VideoDetailFragment
             return;
         }
 
-        // Prevent jumping of the player on devices with cutout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             activity.getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -2369,8 +2236,6 @@ public final class VideoDetailFragment
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
-        // In multiWindow mode status bar is not transparent for devices with cutout
-        // if I include this flag. So without it is better in this case
         final boolean isInMultiWindow = DeviceUtils.isInMultiWindow(activity);
         if (!isInMultiWindow) {
             visibility |= View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -2384,7 +2249,6 @@ public final class VideoDetailFragment
         activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
-    // Listener implementation
     public void hideSystemUiIfNeeded() {
         if (isPlayerAvailable()
                 && player.isFullscreen()
@@ -2403,8 +2267,6 @@ public final class VideoDetailFragment
             return;
         }
 
-        // Restore the old  brightness when fragment.onPause() called or
-        // when a player is in portrait
         lp.screenBrightness = -1;
         activity.getWindow().setAttributes(lp);
     }
@@ -2419,14 +2281,11 @@ public final class VideoDetailFragment
                 || !player.videoPlayerSelected()
                 || !player.isFullscreen()
                 || bottomSheetState != BottomSheetBehavior.STATE_EXPANDED) {
-            // Apply system brightness when the player is not in fullscreen
             restoreDefaultBrightness();
         } else {
-            // Do not restore if user has disabled brightness gesture
             if (!PlayerHelper.isBrightnessGestureEnabled(activity)) {
                 return;
             }
-            // Restore already saved brightness level
             final float brightnessLevel = PlayerHelper.getScreenBrightness(activity);
             if (brightnessLevel == lp.screenBrightness) {
                 return;
@@ -2443,16 +2302,11 @@ public final class VideoDetailFragment
         }
 
         player.checkLandscape();
-        // Let's give a user time to look at video information page if video is not playing
         if (globalScreenOrientationLocked(activity) && !player.isPlaying()) {
             player.play();
         }
     }
 
-    /*
-     * Means that the player fragment was swiped away via BottomSheetLayout
-     * and is empty but ready for any new actions. See cleanUp()
-     * */
     private boolean wasCleared() {
         return url == null;
     }
@@ -2484,7 +2338,6 @@ public final class VideoDetailFragment
                 .setNeutralButton(R.string.open_in_browser, (dialog, i) ->
                         ShareUtils.openUrlInBrowser(requireActivity(), url)
                 );
-        // Maybe there are no video streams available, show just `open in browser` button
         if (resolutions.length > 0) {
             builder.setSingleChoiceItems(resolutions, selectedVideoStreamIndex, (dialog, i) -> {
                         dialog.dismiss();
@@ -2495,11 +2348,7 @@ public final class VideoDetailFragment
         builder.show();
     }
 
-    /*
-     * Remove unneeded information while waiting for a next task
-     * */
     private void cleanUp() {
-        // New beginning
         stack.clear();
         if (currentWorker != null) {
             currentWorker.dispose();
@@ -2514,16 +2363,9 @@ public final class VideoDetailFragment
     // Bottom mini player
     //////////////////////////////////////////////////////////////////////////*/
 
-    /**
-     * That's for Android TV support. Move focus from main fragment to the player or back
-     * based on what is currently selected
-     *
-     * @param toMain if true than the main fragment will be focused or the player otherwise
-     */
     private void moveFocusToMainFragment(final boolean toMain) {
         setupBrightness();
         final ViewGroup mainFragment = requireActivity().findViewById(R.id.fragment_holder);
-        // Hamburger button steels a focus even under bottomSheet
         final Toolbar toolbar = requireActivity().findViewById(R.id.toolbar);
         final int afterDescendants = ViewGroup.FOCUS_AFTER_DESCENDANTS;
         final int blockDescendants = ViewGroup.FOCUS_BLOCK_DESCENDANTS;
@@ -2531,9 +2373,6 @@ public final class VideoDetailFragment
             mainFragment.setDescendantFocusability(afterDescendants);
             toolbar.setDescendantFocusability(afterDescendants);
             ((ViewGroup) requireView()).setDescendantFocusability(blockDescendants);
-            // Only focus the mainFragment if the mainFragment (e.g. search-results)
-            // or the toolbar (e.g. Textfield for search) don't have focus.
-            // This was done to fix problems with the keyboard input, see also #7490
             if (!mainFragment.hasFocus() && !toolbar.hasFocus()) {
                 mainFragment.requestFocus();
             }
@@ -2541,19 +2380,12 @@ public final class VideoDetailFragment
             mainFragment.setDescendantFocusability(blockDescendants);
             toolbar.setDescendantFocusability(blockDescendants);
             ((ViewGroup) requireView()).setDescendantFocusability(afterDescendants);
-            // Only focus the player if it not already has focus
             if (!binding.getRoot().hasFocus()) {
                 binding.detailThumbnailRootLayout.requestFocus();
             }
         }
     }
 
-    /**
-     * When the mini player exists the view underneath it is not touchable.
-     * Bottom padding should be equal to the mini player's height in this case
-     *
-     * @param showMore whether main fragment should be expanded or not
-     */
     private void manageSpaceAtTheBottom(final boolean showMore) {
         final int peekHeight = getResources().getDimensionPixelSize(R.dimen.mini_player_height);
         final ViewGroup holder = requireActivity().findViewById(R.id.fragment_holder);
@@ -2614,11 +2446,8 @@ public final class VideoDetailFragment
                             manageSpaceAtTheBottom(false);
 
                             bottomSheetBehavior.setPeekHeight(peekHeight);
-                            // Disable click because overlay buttons located on top of buttons
-                            // from the player
                             setOverlayElementsClickable(false);
                             hideSystemUiIfNeeded();
-                            // Conditions when the player should be expanded to fullscreen
                             if (DeviceUtils.isLandscape(requireContext())
                                     && isPlayerAvailable()
                                     && player.isPlaying()
@@ -2640,7 +2469,6 @@ public final class VideoDetailFragment
 
                             bottomSheetBehavior.setPeekHeight(peekHeight);
 
-                            // Re-enable clicks
                             setOverlayElementsClickable(true);
                             if (isPlayerAvailable()) {
                                 player.closeItemsList();
@@ -2675,7 +2503,6 @@ public final class VideoDetailFragment
             }
         });
 
-        // User opened a new page and the player will hide itself
         activity.getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             try {
                 List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
@@ -2705,13 +2532,11 @@ public final class VideoDetailFragment
     }
 
     private boolean shouldTriggerCollapse(Fragment fragment) {
-        // 定义需要排除的Fragment类型列表
         List<Class<? extends Fragment>> excludedFragments = Arrays.asList(
                 CommentsFragment.class,
                 CommentReplyFragment.class
         );
 
-        // 检查当前Fragment是否在排除列表中
         return excludedFragments.stream()
                 .noneMatch(clazz -> clazz.isInstance(fragment));
     }
@@ -2736,8 +2561,6 @@ public final class VideoDetailFragment
     private void setOverlayLook(final AppBarLayout appBar,
                                 final AppBarLayout.Behavior behavior,
                                 final float slideOffset) {
-        // SlideOffset < 0 when mini player is about to close via swipe.
-        // Stop animation in this case
         if (behavior == null || slideOffset < 0) {
             return;
         }
@@ -2745,7 +2568,6 @@ public final class VideoDetailFragment
             binding.overlayLayout.setVisibility(View.VISIBLE);
         }
         binding.overlayLayout.setAlpha(Math.min(MAX_OVERLAY_ALPHA, 1 - slideOffset));
-        // These numbers are not special. They just do a cool transition
         behavior.setTopAndBottomOffset(
                 (int) (-binding.detailThumbnailImageView.getHeight() * 2 * (1 - slideOffset) / 3));
         appBar.requestLayout();
@@ -2771,7 +2593,6 @@ public final class VideoDetailFragment
         binding.overlayPlayQueueButton.setClickable(enable);
     }
 
-    // helpers to check the state of player and playerService
     boolean isPlayerAvailable() {
         return (player != null);
     }
@@ -2881,8 +2702,6 @@ public final class VideoDetailFragment
                 .subscribe(response -> {
                     final int responseCode = response.responseCode();
 
-                    // 200 = all good
-                    // 409 = all good, but the request timed out
                     if (responseCode != 200 && responseCode != 409) {
                         String message = response.responseMessage();
                         if (message.equals("")) {
