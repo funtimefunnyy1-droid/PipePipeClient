@@ -119,6 +119,7 @@
     <color name="dark_background">#121316</color>
     <color name="dark_surface">#1B1B1F</color>
     <color name="dark_surface_container">#23252B</color>
+    <color name="dark_surface_container_high">#2E313A</color>
     <color name="libretube_blue">#A8C7FA</color>
     <color name="libretube_on_blue">#00315B</color>
     <color name="libretube_text_primary">#E2E2E6</color>
