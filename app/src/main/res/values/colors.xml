@@ -123,4 +123,10 @@
     <color name="libretube_on_blue">#00315B</color>
     <color name="libretube_text_primary">#E2E2E6</color>
     <color name="libretube_text_secondary">#8E9199</color>
+
+    <!-- Seamless Status Bar Overrides -->
+    <color name="colorPrimary">#121316</color>
+    <color name="colorPrimaryDark">#121316</color>
+    <color name="youtube_primary_color">#121316</color>
+    <color name="youtube_primary_dark_color">#121316</color>
 </resources>
