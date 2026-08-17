@@ -4,39 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="4dp">
 
-    <RelativeLayout
+    <!-- LibreTube Style Filter Header Pill -->
+    <LinearLayout
         android:id="@+id/sortButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
+        android:layout_height="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/item_state_overlay"
+        android:backgroundTint="@color/dark_surface_container_high"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp">
 
         <ImageView
             android:id="@+id/sortButtonIcon"
-            android:layout_width="48dp"
-            android:layout_height="28dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="6dp"
             app:srcCompat="@drawable/ic_filter_list"
-            tools:ignore="ContentDescription,RtlHardcoded" />
+            app:tint="@color/libretube_blue"
+            tools:ignore="ContentDescription" />
 
         <org.schabi.newpipe.views.NewPipeTextView
             android:id="@+id/sortButtonText"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_toRightOf="@id/sortButtonIcon"
-            android:gravity="left|center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/title_most_played"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            tools:ignore="RtlHardcoded" />
-    </RelativeLayout>
+            android:textColor="@color/libretube_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <include
         android:id="@+id/playlist_control"
