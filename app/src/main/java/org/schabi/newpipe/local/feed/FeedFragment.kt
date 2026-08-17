@@ -59,6 +59,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import org.schabi.newpipe.NewPipeDatabase
 import org.schabi.newpipe.R
 import org.schabi.newpipe.database.feed.model.FeedGroupEntity
+import org.schabi.newpipe.database.feed.model.StreamWithState
 import org.schabi.newpipe.database.subscription.SubscriptionEntity
 import org.schabi.newpipe.databinding.FragmentFeedBinding
 import org.schabi.newpipe.databinding.PlaylistControlBinding
@@ -252,8 +253,12 @@ class FeedFragment : BaseStateFragment<FeedState>() {
                 } else {
                     feedBinding.continueWatchingContainer.isVisible = true
                     val carouselItems = entries.take(10).map { entry ->
+                        val streamWithState = StreamWithState().apply {
+                            stream = entry.streamEntity
+                            state = null
+                        }
                         StreamItem(
-                            entry.streamEntity.toStreamInfoItem()
+                            streamWithState
                         ).apply {
                             itemVersion = StreamItem.ItemVersion.CARD
                         }
