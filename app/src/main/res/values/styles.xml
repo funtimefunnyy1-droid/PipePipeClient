@@ -58,6 +58,11 @@
         <item name="windowBackground">@color/dark_background</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme.Dark.Base</item>
 
+        <!-- Seamless Edge-to-Edge Status Bar -->
+        <item name="android:statusBarColor">@color/dark_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
         <item name="separator_color">@color/dark_surface_container</item>
         <item name="contrast_background_color">@color/dark_surface</item>
         <item name="checked_selector">@drawable/selector_checked_dark</item>
@@ -83,6 +88,11 @@
         <item name="android:windowBackground">#000000</item>
         <item name="windowBackground">#000000</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme.Black</item>
+
+        <!-- Seamless AMOLED Status Bar -->
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
 
         <item name="separator_color">#1F1F1F</item>
         <item name="contrast_background_color">#121212</item>
