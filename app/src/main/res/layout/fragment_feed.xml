@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/dark_background">
 
     <RelativeLayout
         android:id="@+id/refresh_root_view"
@@ -49,11 +50,11 @@
         </LinearLayout>
 
         <include
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/playlist_control"
-                layout="@layout/playlist_control"
-                android:layout_below="@id/refresh_info_container" />
+            android:id="@+id/playlist_control"
+            layout="@layout/playlist_control"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/refresh_info_container" />
 
         <ImageView
             android:id="@+id/refreshIcon"
@@ -77,11 +78,72 @@
             android:background="?attr/separator_color" />
     </RelativeLayout>
 
+    <!-- LibreTube Style Horizontal Continue Watching Section -->
+    <LinearLayout
+        android:id="@+id/continue_watching_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/refresh_root_view"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <RelativeLayout
+            android:id="@+id/continue_watching_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="4dp">
+
+            <org.schabi.newpipe.views.NewPipeTextView
+                android:id="@+id/continue_watching_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:text="@string/title_activity_history"
+                android:textColor="@color/libretube_text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/continue_watching_chevron"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:rotation="270"
+                app:srcCompat="@drawable/ic_arrow_drop_down"
+                app:tint="@color/libretube_text_secondary"
+                tools:ignore="ContentDescription" />
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/continue_watching_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="3"
+            tools:listitem="@layout/list_stream_card_item" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/dark_surface_container_high" />
+    </LinearLayout>
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/refresh_root_view">
+        android:layout_below="@+id/continue_watching_container">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/items_list"
